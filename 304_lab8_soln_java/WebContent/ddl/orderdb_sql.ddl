@@ -34,6 +34,16 @@ CREATE TABLE customer (
     PRIMARY KEY (customerId)
 );
 
+CREATE TABLE shoppingCart (
+    userid              VARCHAR(20),
+    productId           INT,
+    productName         VARCHAR(40),
+    quantity            INT,
+    productPrice        DECIMAL(10,2),
+    FOREIGN KEY (customerId) REFERENCES customer(customerid)
+    PRIMARY KEY (customerId)
+);
+
 CREATE TABLE paymentmethod (
     paymentMethodId     INT IDENTITY,
     paymentType         VARCHAR(20),
@@ -79,6 +89,7 @@ CREATE TABLE product (
 );
 
 CREATE TABLE Cars (
+    CarID           Int,
     CarName         VARCHAR(40),
     CarYear         INT,
     CarPrice        INT,
@@ -95,7 +106,10 @@ CREATE TABLE Cars (
     CarPWRatio      FLOAT,
     CarMonthlyFuelCosts FLOAT,
     CarPPRatio      FLOAT,
-    OverallScore    FLOAT
+    OverallScore    FLOAT,
+    Cartegory          INT,
+     PRIMARY KEY (CarID),
+     FOREIGN KEY (Cartegory) REFERENCES category(categoryId)
 );
 
 -- load car data
@@ -173,14 +187,14 @@ CREATE TABLE review (
         ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-INSERT INTO category(categoryName) VALUES ('Beverages');
-INSERT INTO category(categoryName) VALUES ('Condiments');
-INSERT INTO category(categoryName) VALUES ('Dairy Products');
-INSERT INTO category(categoryName) VALUES ('Produce');
-INSERT INTO category(categoryName) VALUES ('Meat/Poultry');
-INSERT INTO category(categoryName) VALUES ('Seafood');
-INSERT INTO category(categoryName) VALUES ('Confections');
-INSERT INTO category(categoryName) VALUES ('Grains/Cereals');
+INSERT INTO category(categoryName) VALUES ('HatchBack');
+INSERT INTO category(categoryName) VALUES ('Sedan');
+INSERT INTO category(categoryName) VALUES ('Coupe');
+INSERT INTO category(categoryName) VALUES ('Roadster');
+INSERT INTO category(categoryName) VALUES ('SUV');
+INSERT INTO category(categoryName) VALUES ('Exotic');
+INSERT INTO category(categoryName) VALUES ('Hybrid');
+INSERT INTO category(categoryName) VALUES ('EV');
 
 INSERT product(productName, categoryId, productDesc, productPrice) VALUES ('Chai', 1, '10 boxes x 20 bags',18.00);
 INSERT product(productName, categoryId, productDesc, productPrice) VALUES ('Chang',1,'24 - 12 oz bottles',19.00);
@@ -225,7 +239,7 @@ INSERT INTO productInventory(productId, warehouseId, quantity, price) VALUES (9,
 INSERT INTO productInventory(productId, warehouseId, quantity, price) VALUES (10, 1, 3, 31);
 
 INSERT INTO customer (firstName, lastName, email, phonenum, address, city, state, postalCode, country, userid, password) VALUES ('Arnold', 'Anderson', 'a.anderson@gmail.com', '204-111-2222', '103 AnyWhere Street', 'Winnipeg', 'MB', 'R3X 45T', 'Canada', 'arnold' , 'test');
-INSERT INTO customer (firstName, lastName, email, phonenum, address, city, state, postalCode, country, userid, password) VALUES ('Bobby', 'Brown', 'bobby.brown@hotmail.ca', '572-342-8911', '222 Bush Avenue', 'Boston', 'MA', '22222', 'United States', 'bobby' , 'bobby');
+INSERT INTO customer (firstName, lastName, email, phonenum, address, city, state, postalCode, country, userid, password) VALUES ('Bobby', 'Brown', 'bobby.brown@hotmail.ca', '572-342-8911', '222 Bush Avenue', 'Boston', 'bbb', '22222', 'United States', 'bobby' , 'bobby');
 INSERT INTO customer (firstName, lastName, email, phonenum, address, city, state, postalCode, country, userid, password) VALUES ('Candace', 'Cole', 'cole@charity.org', '333-444-5555', '333 Central Crescent', 'Chicago', 'IL', '33333', 'United States', 'candace' , 'password');
 INSERT INTO customer (firstName, lastName, email, phonenum, address, city, state, postalCode, country, userid, password) VALUES ('Darren', 'Doe', 'oe@doe.com', '250-807-2222', '444 Dover Lane', 'Kelowna', 'BC', 'V1V 2X9', 'Canada', 'darren' , 'pw');
 INSERT INTO customer (firstName, lastName, email, phonenum, address, city, state, postalCode, country, userid, password) VALUES ('Elizabeth', 'Elliott', 'engel@uiowa.edu', '555-666-7777', '555 Everwood Street', 'Iowa City', 'IA', '52241', 'United States', 'beth' , 'test');

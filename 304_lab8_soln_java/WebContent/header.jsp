@@ -85,7 +85,7 @@
               <a class="active" href="index.jsp">Home</a>
               <a href="createAccount.jsp">Register</a>
               <a href="login.jsp">Login</a>
-              <a href="editCustomer.jsp">Edit Info</a>
+              <a href="EditAccount.jsp">Edit My Info</a>
               <a href="listprod.jsp">Shop</a>
               <a href="listprodForReview.jsp">Review Products</a>
               <a href="listorder.jsp">Orders</a>

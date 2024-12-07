@@ -35,35 +35,35 @@ catch (SQLException ex)
 */
 %>
 
-  <option>Beverages</option>
-  <option>Condiments</option>
-  <option>Confections</option>
-  <option>Dairy Products</option>
-  <option>Grains/Cereals</option>
-  <option>Meat/Poultry</option>
-  <option>Produce</option>
-  <option>Seafood</option>       
+  <option>HatchBack</option>
+  <option>Sedan</option>
+  <option>Coupe</option>
+  <option>Roadster</option>
+  <option>SUV</option>
+  <option>Exotic</option>
+  <option>Hybrid</option>
+  <option>EV</option>       
   </select>
-  <input type="text" name="productName" size="50">
+  <input type="text" name="CarName" size="50">
   <input type="submit" value="Submit"><input type="reset" value="Reset"></p>
 </form>
 
 <%
 // Colors for different item categories
 HashMap<String,String> colors = new HashMap<String,String>();		// This may be done dynamically as well, a little tricky...
-colors.put("Beverages", "#0000FF");
-colors.put("Condiments", "#FF0000");
-colors.put("Confections", "#000000");
-colors.put("Dairy Products", "#6600CC");
-colors.put("Grains/Cereals", "#55A5B3");
-colors.put("Meat/Poultry", "#FF9900");
-colors.put("Produce", "#00CC00");
-colors.put("Seafood", "#FF66CC");
+colors.put("HatchBack", "#0000FF");
+colors.put("Sedan", "#FF0000");
+colors.put("Coupe", "#000000");
+colors.put("Roadster", "#6600CC");
+colors.put("SUV", "#55A5B3");
+colors.put("Exotic", "#FF9900");
+colors.put("Hybrid", "#00CC00");
+colors.put("EV", "#FF66CC");
 %>
 
 <%
 // Get product name to search for
-String name = request.getParameter("productName");
+String name = request.getParameter("CarName");
 String category = request.getParameter("categoryName");
 
 boolean hasNameParam = name != null && !name.equals("");
@@ -74,23 +74,23 @@ if (hasNameParam && hasCategoryParam)
 {
 	filter = "<h3>Products containing '"+name+"' in category: '"+category+"'</h3>";
 	name = '%'+name+'%';
-	sql = "SELECT productId, productName, productPrice, categoryName FROM Product P JOIN Category C ON P.categoryId = C.categoryId WHERE productName LIKE ? AND categoryName = ?";
+	sql = "SELECT CarID, CarName, CarPrice, Cartegory,categoryName FROM Cars V JOIN Category C ON V.Cartegory = C.categoryId WHERE CarName LIKE ? AND categoryName = ?";
 }
 else if (hasNameParam)
 {
 	filter = "<h3>Products containing '"+name+"'</h3>";
 	name = '%'+name+'%';
-	sql = "SELECT productId, productName, productPrice, categoryName FROM Product P JOIN Category C ON P.categoryId = C.categoryId WHERE productName LIKE ?";
+	sql = "SELECT CarID, CarName, CarPrice, Cartegory,categoryName FROM Cars V JOIN Category C ON V.Cartegory = C.categoryId WHERE CarName LIKE ?";
 }
 else if (hasCategoryParam)
 {
 	filter = "<h3>Products in category: '"+category+"'</h3>";
-	sql = "SELECT productId, productName, productPrice, categoryName FROM Product P JOIN Category C ON P.categoryId = C.categoryId WHERE categoryName = ?";
+	sql = "SELECT CarID, CarName, CarPrice, Cartegory,categoryName FROM Cars V JOIN Category C ON V.Cartegory = C.categoryId WHERE categoryName = ?";
 }
 else
 {
 	filter = "<h3>All Products</h3>";
-	sql = "SELECT productId, productName, productPrice, categoryName FROM Product P JOIN Category C ON P.categoryId = C.categoryId";
+	sql = "SELECT CarID, CarName, CarPrice, Cartegory,categoryName FROM Cars V JOIN Category C ON V.Cartegory = C.categoryId";
 }
 
 out.println(filter);
@@ -119,7 +119,7 @@ try
 	
 	ResultSet rst = pstmt.executeQuery();
 	
-	out.print("<font face=\"Century Gothic\" size=\"2\"><table class=\"table\" border=\"1\"><tr><th class=\"col-md-1\"></th><th>Product Name</th>");
+	out.print("<font face=\"Century Gothic\" size=\"2\"><table class=\"table\" border=\"1\"><tr><th class=\"col-md-1\"></th><th>Car Name</th>");
 	out.println("<th>Category</th><th>Price</th></tr>");
 	while (rst.next()) 
 	{
@@ -127,12 +127,12 @@ try
 		out.print("<td class=\"col-md-1\"><a href=\"addcart.jsp?id=" + id + "&name=" + rst.getString(2)
 				+ "&price=" + rst.getDouble(3) + "\">Add to Cart</a></td>");
 
-		String itemCategory = rst.getString(4);
+		String itemCategory = rst.getString(5);
 		String color = (String) colors.get(itemCategory);
 		if (color == null)
 			color = "#FFFFFF";
 
-		out.println("<td><a href=\"product.jsp?id="+id+"\"<font color=\"" + color + "\">" + rst.getString(2) + "</font></td>"
+		out.println("<td><a href=\"CarDetails.jsp?id="+id+"\"<font color=\"" + color + "\">" + rst.getString(2) + "</font></td>"
 				+ "<td><font color=\"" + color + "\">" + itemCategory + "</font></td>"
 				+ "<td><font color=\"" + color + "\">" + currFormat.format(rst.getDouble(3))
 				+ "</font></td></tr>");

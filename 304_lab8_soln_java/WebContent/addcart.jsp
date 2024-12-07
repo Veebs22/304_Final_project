@@ -1,5 +1,6 @@
 <%@ page import="java.util.HashMap" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ include file="jdbc.jsp" %>
 <%
 // Get the current list of products
 @SuppressWarnings({"unchecked"})
@@ -12,6 +13,24 @@ if (productList == null)
 
 // Add new product selected
 // Get product information
+String userName = (String) session.getAttribute("authenticatedUser");
+
+int userid = -1;
+try {
+    getConnection();
+    	Statement stmt2 = con.createStatement();
+		 stmt2.execute("USE orders");
+    String sql = "SELECT * FROM customer WHERE userid ="+userName+"";
+  	Statement stmt = con.createStatement();
+	ResultSet rst = stmt.executeQuery(sql);
+	if(rst.next()){
+		userid = rst.getInt(1);
+	}
+    con.close();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+session.setAttribute("userId",userid);
 String id = request.getParameter("id");
 String name = request.getParameter("name");
 String price = request.getParameter("price");
@@ -34,5 +53,24 @@ else
 	productList.put(id,product);
 
 session.setAttribute("productList", productList);
+
+// Store the cart item in the database
+try {
+    getConnection();
+    Statement stmt3 = con.createStatement();
+		 stmt3.execute("USE orders");
+    String insertQuery = "INSERT INTO shoppingCart (userid, product_id, productName, quantity, price) VALUES (?, ?, ?, ?, ? )";
+    PreparedStatement stmt = con.prepareStatement(insertQuery);
+    stmt.setInt(1, userid);
+	stmt.setString(2, id);
+    stmt.setString(3, name);
+    stmt.setDouble(4, Double.parseDouble(price));
+    stmt.setInt(5, quantity);
+    stmt.executeUpdate();
+    con.close();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+
 %>
 <jsp:forward page="showcart.jsp" />

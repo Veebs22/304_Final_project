@@ -1,84 +1,74 @@
-<%@ page import="java.util.HashMap" %>
-<%@ page import="java.util.Iterator" %>
-<%@ page import="java.util.ArrayList" %>
-<%@ page import="java.text.NumberFormat" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="java.util.Locale" %>
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF8"%>
+<%@ page import="java.sql.*" %>
+<%@ page import="java.util.*" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ include file="jdbc.jsp" %>
+
 <!DOCTYPE html>
 <html>
 <head>
-<title>Your Shopping Cart</title>
+    <title>Your Shopping Cart</title>
 </head>
 <body>
 
 <%
-// Get the current list of products
-@SuppressWarnings({"unchecked"})
-HashMap<String, ArrayList<Object>> productList = (HashMap<String, ArrayList<Object>>) session.getAttribute("productList");
+    int userId = (int) session.getAttribute("userId");
+    if (userId == -1) {
+        out.println("<h1>You need to log in to view your cart.</h1>");
+    } else {
+        try {
+            getConnection();
+            // Fetch the cart contents from the database
+            String query = "SELECT * FROM shopping_cart WHERE user_id = ?";
+            PreparedStatement stmt = con.prepareStatement(query);
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
 
-if (productList == null)
-{	out.println("<H1>Your shopping cart is empty!</H1>");
-	productList = new HashMap<String, ArrayList<Object>>();
-}
-else
-{
-	NumberFormat currFormat = NumberFormat.getCurrencyInstance(Locale.US);
+            if (!rs.next()) {
+                out.println("<h1>Your shopping cart is empty!</h1>");
+            } else {
+                out.println("<h1>Your Shopping Cart</h1>");
+                out.println("<table><tr><th>Product Id</th><th>Product Name</th><th>Quantity</th><th>Price</th><th>Subtotal</th></tr>");
+                
+                double total = 0;
+                do {
+                    String productId = rs.getString("product_id");
+                    int quantity = rs.getInt("quantity");
+                    double price = rs.getDouble("price");
 
-	out.println("<h1>Your Shopping Cart</h1>");
-	out.print("<table><tr><th>Product Id</th><th>Product Name</th><th>Quantity</th>");
-	out.println("<th>Price</th><th>Subtotal</th></tr>");
+                    // Fetch product details from the products table if needed (e.g., product name)
+                    String productQuery = "SELECT name FROM products WHERE product_id = ?";
+                    PreparedStatement productStmt = con.prepareStatement(productQuery);
+                    productStmt.setString(1, productId);
+                    ResultSet productRs = productStmt.executeQuery();
 
-	double total =0;
-	Iterator<Map.Entry<String, ArrayList<Object>>> iterator = productList.entrySet().iterator();
-	while (iterator.hasNext()) 
-	{	Map.Entry<String, ArrayList<Object>> entry = iterator.next();
-		ArrayList<Object> product = (ArrayList<Object>) entry.getValue();
-		if (product.size() < 4)
-		{
-			out.println("Expected product with four entries. Got: "+product);
-			continue;
-		}
-		
-		out.print("<tr><td>"+product.get(0)+"</td>");
-		out.print("<td>"+product.get(1)+"</td>");
+                    if (productRs.next()) {
+                        String productName = productRs.getString("name");
+                        double subtotal = price * quantity;
+                        total += subtotal;
 
-		out.print("<td align=\"center\">"+product.get(3)+"</td>");
-		Object price = product.get(2);
-		Object itemqty = product.get(3);
-		double pr = 0;
-		int qty = 0;
-		
-		try
-		{
-			pr = Double.parseDouble(price.toString());
-		}
-		catch (Exception e)
-		{
-			out.println("Invalid price for product: "+product.get(0)+" price: "+price);
-		}
-		try
-		{
-			qty = Integer.parseInt(itemqty.toString());
-		}
-		catch (Exception e)
-		{
-			out.println("Invalid quantity for product: "+product.get(0)+" quantity: "+qty);
-		}		
-
-		out.print("<td align=\"right\">"+currFormat.format(pr)+"</td>");
-		out.print("<td align=\"right\">"+currFormat.format(pr*qty)+"</td></tr>");
-		out.println("</tr>");
-		total = total +pr*qty;
-	}
-	out.println("<tr><td colspan=\"4\" align=\"right\"><b>Order Total</b></td>"
-			+"<td align=\"right\">"+currFormat.format(total)+"</td></tr>");
-	out.println("</table>");
-
-	out.println("<h2><a href=\"checkout.jsp\">Check Out</a></h2>");
-}
+                        out.print("<tr>");
+                        out.print("<td>" + productId + "</td>");
+                        out.print("<td>" + productName + "</td>");
+                        out.print("<td>" + quantity + "</td>");
+                        out.print("<td>" + price + "</td>");
+                        out.print("<td>" + subtotal + "</td>");
+                        out.print("</tr>");
+                    }
+                } while (rs.next());
+                
+                out.println("<tr><td colspan=\"4\" align=\"right\"><b>Order Total</b></td><td>" + total + "</td></tr>");
+                out.println("</table>");
+                out.println("<h2><a href=\"checkout.jsp\">Check Out</a></h2>");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            con.close();
+        }
+    }
 %>
-<h2><a href="listprod.jsp">Continue Shopping</a></h2>
-</body>
-</html> 
 
+<h2><a href="listprod.jsp">Continue Shopping</a></h2>
+
+</body>
+</html>

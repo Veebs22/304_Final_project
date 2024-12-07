@@ -50,10 +50,10 @@
     if ("POST".equalsIgnoreCase(request.getMethod())) {
         String firstName = request.getParameter("firstName");
         String lastName = request.getParameter("lastName");
-        String email = request.getParameter("email");
+            String email = request.getParameter("email");
         String phoneNumber = request.getParameter("phoneNumber");
         String address = request.getParameter("address");
-        String city = request.getParameter("city");
+            String city = request.getParameter("city");
         String state = request.getParameter("state");
         String postalCode = request.getParameter("postalCode");
         String country = request.getParameter("country");
@@ -61,38 +61,45 @@
         String password = request.getParameter("password");
 
         try {
-            // Establish connection to the database
-             getConnection();
-			Statement stmt2 = con.createStatement(); 
-			stmt2.execute("USE orders");
+            getConnection();
+            Statement stmt2 = con.createStatement();
+            stmt2.execute("USE orders");
+            String checkQuery = "SELECT COUNT(*) FROM customer WHERE userid = ?";
+            PreparedStatement checkStmt = con.prepareStatement(checkQuery);
+            checkStmt.setString(1, username);
+            ResultSet checkResult = checkStmt.executeQuery();
 
-            // SQL query to insert customer data
-            String query = "INSERT INTO customer (firstName, lastName, email, phonenum, address, city, state, postalCode, country, userid, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            PreparedStatement stmt = con.prepareStatement(query);
-            stmt.setString(1, firstName);
-            stmt.setString(2, lastName);
-            stmt.setString(3, email);
-            stmt.setString(4, phoneNumber);
-            stmt.setString(5, address);
-            stmt.setString(6, city);
-            stmt.setString(7, state);
-            stmt.setString(8, postalCode);
-            stmt.setString(9, country);
-            stmt.setString(10, username);
-            stmt.setString(11, password);
-
-            // Execute update
-            int result = stmt.executeUpdate();
-
-            // Check if data was inserted successfully
-            if (result > 0) {
+            if (checkResult.next() && checkResult.getInt(1) > 0) {
+                // Username exists
 %>
-                <p>Sign-up successful!</p>
+                <p style="color: red;">Error: Username already in use. Please choose a different username.</p>
 <%
             } else {
+              
+            String query = "INSERT INTO customer (firstName, lastName, email, phonenum, address, city, state, postalCode, country, userid, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                PreparedStatement stmt = con.prepareStatement(query);
+                stmt.setString(1, firstName);
+                        stmt.setString(2, lastName);
+                    stmt.setString(3, email);
+                stmt.setString(4, phoneNumber);
+            stmt.setString(5, address);
+                stmt.setString(6, city);
+                stmt.setString(7, state);
+                stmt.setString(8, postalCode);
+         stmt.setString(9, country);
+                stmt.setString(10, username);
+                stmt.setString(11, password);
+                int result = stmt.executeUpdate();
+
+                if (result > 0) {
 %>
-                <p>There was an error during sign-up. Please try again.</p>
+                    <p>Sign-up successful!</p>
 <%
+                } else {
+%>
+                    <p>There was an error during sign-up. Please try again.</p>
+<%
+                }
             }
             con.close();
         } catch (Exception e) {

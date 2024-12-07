@@ -14,11 +14,23 @@
             text-align: center;
             margin-top: 30px;
         }
-        .table {
-            margin-top: 20px;
-            margin-left: auto;
-            margin-right: auto;
-            width: 80%;
+        .container {
+            max-width: 2000px; 
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .car-item {
+            margin-bottom: 30px; /* Space between car entries */
+            display: flex;
+            align-items: center;
+        }
+        .car-image {
+            max-width: 500px; /* Adjust image size */
+            height: auto;
+            margin-right: 100px; /* Space between image and data */
+        }
+        .car-details {
+            flex: 1; /* Allow details to take available space */
         }
         .table th, .table td {
             text-align: left;
@@ -35,11 +47,6 @@
         .table tr:nth-child(even) td {
             background-color: #f2f2f2;
         }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-        }
         .footer {
             text-align: center;
             margin-top: 30px;
@@ -54,19 +61,48 @@
 <%@ include file="auth.jsp" %>
 <%@ page import="java.text.NumberFormat" %>
 <%@ include file="jdbc.jsp" %>
-
-<%
-    String userName = (String) session.getAttribute("authenticatedUser");
-%>
+<%@ include file="header.jsp" %>
 
 <div class="container">
     <%
-        String sql = "SELECT * FROM Cars";
+   
+        String output = "CarID asc";
+      
+            String sql2 = "select state FROM Customer WHERE userid = ?";
+                    try {
+                    getConnection();
+                    Statement stmt = con.createStatement();
+                    stmt.execute("USE orders");
+                    PreparedStatement pstmt = con.prepareStatement(sql2);
+	                pstmt.setString(1, userName);	
+                  
+                    ResultSet rst = pstmt.executeQuery();
+                    if (rst.next()) {
+                        String state = rst.getString(1);
+                       switch(state){
+                        case "CA": output = "CarMPG desc"; break;
+                        case "TX": output = "CarPower desc"; break;
+                        case "BC": output = "CarWinterCapable Desc"; break;
+                        case "QB": output = "CarWinterCapable Desc"; break;
+                        case "WA": output = "CarWinterCapable Desc"; break;
+                        case "AB": output = "CarWeight Desc"; break;
+                         case "MA": output = "CarZeroToSixty asc"; break;
+                       }
+                    }
+                } catch (SQLException ex) {
+                    out.println("<p class='text-danger'>" + ex + "</p>");
+                } finally {
+                    closeConnection();
+                }
+               
+        
+    String recomendation = output;
+    
+        String sql = "SELECT * FROM Cars ORDER BY "+recomendation+"";
         NumberFormat currFormat = NumberFormat.getCurrencyInstance();
 
         try {
             out.println("<h3>Car Inventory</h3>");
-
             getConnection();
             Statement stmt = con.createStatement();
             stmt.execute("USE orders");
@@ -76,21 +112,36 @@
 
             // Loop through the result set and display car details in tables
             while (rst.next()) {
-                out.println("<div class=\"table-responsive\">");
-                out.println("<table class=\"table table-bordered table-striped\">");
-                out.println("<tr><th>Name</th><td>" + rst.getString(1) + "</td></tr>");
-                out.println("<tr><th>Year</th><td>" + rst.getInt(2) + "</td></tr>");
-                out.println("<tr><th>Price</th><td>" + currFormat.format(rst.getInt(3)) + "</td></tr>");
-                out.println("<tr><th>MPG</th><td>" + rst.getDouble(4) + "</td></tr>");
-				out.println("<tr><th>0-60 (Mph)</th><td>" + rst.getDouble(6) + "</td></tr>");
+                String carName = rst.getString(2); 
+                int carYear = rst.getInt(3); 
+                String imageUrl = "img/" + rst.getInt(1) + ".jpg";  
+                out.println("<div class='row car-item'>");
+
+                // Display car image
+                out.println("<div class='col-md-4 text-center'>");
+                out.println("<img src='" + imageUrl + "' alt='" + carYear + " " + carName + "\n Image not available!"+"' class='car-image' />");
+                out.println("</div>");
+
+                // Display car details
+                out.println("<div class='col-md-8 car-details'>");
+                out.println("<table class='table table-bordered table-striped'>");
+                out.println("<tr><th>Name</th><td>" + carName + "</td></tr>");
+                out.println("<tr><th>Year</th><td>" + carYear + "</td></tr>");
+                out.println("<tr><th>Price</th><td>" + currFormat.format(rst.getInt(4)) + "</td></tr>");
+                out.println("<tr><th>MPG</th><td>" + rst.getDouble(5) + "</td></tr>");
+                out.println("<tr><th>0-60 (Mph)</th><td>" + rst.getDouble(7) + "</td></tr>");
                 out.println("</table>");
                 out.println("</div>");
+
+                out.println("</div>"); 
             }
         } catch (SQLException ex) {
-            out.println("<p class=\"text-danger\">" + ex + "</p>");
+            out.println("<p class='text-danger'>" + ex + "</p>");
         } finally {
             closeConnection();
         }
+
+        
     %>
 </div>
 
